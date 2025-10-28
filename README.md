@@ -71,11 +71,12 @@ The design focuses on minimizing off-chip memory access through **cyclic weight 
 
 ## 🧪 Simulation and Verification
 
-- RTL verification via **Synopsys VCS**
-- Waveform debug with **Verdi**
-- Post-synthesis verification using **Design Compiler**
-- Testbench stimuli generated from **quantized PyTorch tensors**
-- Output validated against reference software model
+- RTL verification performed using **Synopsys VCS**  
+- Waveform debugging and signal tracing with **Verdi**  
+- Post-synthesis functional verification using **Design Compiler**  
+- Testbench stimuli generated from **quantized PyTorch tensors**  
+- Output results matched against a **reference software model** to ensure functional correctness  
+- Deployed the accelerator on a **quantized MNIST inference task**, demonstrating correct end-to-end mapping from software model to hardware execution
 
 ---
 
