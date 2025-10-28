@@ -1,0 +1,390 @@
+Command: vcs -timescale=1ns/1fs -j4 -sverilog +v2k -full64 -Mupdate -R -debug_access+all \
+-f filelist.f -o simv -l vcs.log -v tsmc13_neg.v +define+GATE +define+ +neg_tchk \
+
+*** Using c compiler gcc instead of cc ...
+                         Chronologic VCS (TM)
+         Version U-2023.03_Full64 -- Thu Jul 10 14:47:56 2025
+
+                    Copyright (c) 1991 - 2023 Synopsys, Inc.
+   This software and the associated documentation are proprietary to Synopsys,
+ Inc. This software may only be used in accordance with the terms and conditions
+ of a written license agreement with Synopsys, Inc. All other use, reproduction,
+   or distribution of this software is strictly prohibited.  Licensed Products
+     communicate with Synopsys servers for the purpose of providing software
+    updates, detecting software piracy and verifying that customers are using
+    Licensed Products in conformity with the applicable License Key for such
+  Licensed Products. Synopsys will use information gathered in connection with
+    this process to deliver software updates and pursue software pirates and
+                                   infringers.
+
+ Inclusivity & Diversity - Visit SolvNetPlus to read the "Synopsys Statement on
+            Inclusivity and Diversity" (Refer to article 000036315 at
+                        https://solvnetplus.synopsys.com)
+
+Parsing design file 'tb_accelerator_functional.sv'
+Parsing included file 'Accelerator.sv'.
+Parsing included file '../Controller/Controller.sv'.
+Back to file 'Accelerator.sv'.
+Parsing included file '../Triangle_Buffer/Triangle_Buffer.sv'.
+Back to file 'Accelerator.sv'.
+Parsing included file '../Systolic_Array/Systolic_Array.sv'.
+Parsing included file '../Processing_Elements/Processing_Elements.sv'.
+Back to file '../Systolic_Array/Systolic_Array.sv'.
+Back to file 'Accelerator.sv'.
+Back to file 'tb_accelerator_functional.sv'.
+Top Level Modules:
+       tb_accelerator_functional
+TimeScale is 1 ns / 1 fs
+
+   ***   $sdf_annotate() version 1.2R
+   ***    SDF file: "./Netlist/Accelerator_SYN.sdf"
+   ***    Annotation scope: tb_accelerator_functional
+   ***    No MTM selection argument specified
+   ***    No SCALE FACTORS argument specified
+   ***    No SCALE TYPE argument specified
+   ***    MTM selection defaulted to "TOOL_CONTROL":
+               (+typdelays compiled, TYPICAL delays selected)
+   ***    SCALE FACTORS defaulted to "1.0:1.0:1.0":
+   ***    SCALE TYPE defaulted to: "FROM_MTM"
+   ***    Turnoff delay: "FROM_FILE"
+   ***    Approximation (mipd) policy: "MAXIMUM"
+
+   ***    SDF annotation begin: Thu Jul 10 14:47:56 2025
+
+
+SDF Info: +pulse_r/100, +pulse_e/100 in effect
+
+Warning-[SDFCOM_ICBF] Instance cannot be found
+./Netlist/Accelerator_SYN.sdf, 16
+  SDF Warning: Instance tb_accelerator_functional of type "Accelerator" cannot
+  be found .
+
+
+Warning-[SDFCOM_ICBF] Instance cannot be found
+./Netlist/Accelerator_SYN.sdf, 620872
+  SDF Warning: Instance U301910 of type "NOR2_X0P5A_A9TR" cannot be found 
+  under  tb_accelerator_functional
+
+
+Warning-[SDFCOM_ICBF] Instance cannot be found
+./Netlist/Accelerator_SYN.sdf, 620882
+  SDF Warning: Instance U301909 of type "INV_X0P6B_A9TR" cannot be found under
+  tb_accelerator_functional
+
+
+Warning-[SDFCOM_ICBF] Instance cannot be found
+./Netlist/Accelerator_SYN.sdf, 620891
+  SDF Warning: Instance U301908 of type "OAI21_X0P5M_A9TR" cannot be found 
+  under  tb_accelerator_functional
+
+
+Warning-[SDFCOM_ICBF] Instance cannot be found
+./Netlist/Accelerator_SYN.sdf, 620904
+  SDF Warning: Instance U301907 of type "NAND2_X0P5A_A9TR" cannot be found 
+  under  tb_accelerator_functional
+
+
+Warning-[SDFCOM_ICBF] Instance cannot be found
+./Netlist/Accelerator_SYN.sdf, 620914
+  SDF Warning: Instance U301906 of type "OAI211_X1M_A9TR" cannot be found 
+  under  tb_accelerator_functional
+
+
+Warning-[SDFCOM_ICBF] Instance cannot be found
+./Netlist/Accelerator_SYN.sdf, 620930
+  SDF Warning: Instance U301905 of type "OAI222_X0P5M_A9TR" cannot be found 
+  under  tb_accelerator_functional
+
+
+Warning-[SDFCOM_ICBF] Instance cannot be found
+./Netlist/Accelerator_SYN.sdf, 620992
+  SDF Warning: Instance U301904 of type "AOI21_X1M_A9TR" cannot be found under
+  tb_accelerator_functional
+
+
+Warning-[SDFCOM_ICBF] Instance cannot be found
+./Netlist/Accelerator_SYN.sdf, 621005
+  SDF Warning: Instance U301903 of type "INV_X0P6B_A9TR" cannot be found under
+  tb_accelerator_functional
+
+All future warnings not reported; use +sdfverbose to report them.
+
+Warning-[SDFCOM_ICBF] Instance cannot be found
+./Netlist/Accelerator_SYN.sdf, 621014
+  SDF Warning: Instance U301902 of type "AOI21_X1M_A9TR" cannot be found under
+  tb_accelerator_functional
+
+
+          Total errors: 0
+          Total warnings: 252489
+   ***    SDF annotation completed: Thu Jul 10 14:48:02 2025
+
+
+Starting vcs inline pass...
+
+Note-[VCS_PARAL] Parallel code-gen enabled
+  VCS is running with parallel code generation(-j)...
+
+12 modules and 0 UDP read.
+recompiling module Accelerator
+recompiling module tb_accelerator_functional
+recompiling module Systolic_Array
+recompiling module Controller
+recompiling module Input_Buffer
+recompiling module Output_Buffer
+recompiling module upper_pe
+recompiling module standard_pe
+recompiling module Buffer
+recompiling module upper_right_pe
+recompiling module right_pe
+recompiling module Signal_Buffer
+All of 12 modules done
+make[1]: Entering directory `/home/M14/chialiu0618/Accelerator/Accelerator/csrc' \
+
+rm -f _cuarc*.so _csrc*.so pre_vcsobj_*.so share_vcsobj_*.so
+if [ -x ../simv ]; then chmod a-x ../simv; fi
+g++  -o ../simv      -rdynamic  -Wl,-rpath='$ORIGIN'/simv.daidir -Wl,-rpath=./simv.daidir \
+-Wl,-rpath=/usr/cad/synopsys/vcs/2023.03/linux64/lib -L/usr/cad/synopsys/vcs/2023.03/linux64/lib \
+-Wl,-rpath-link=./  /usr/lib64/libnuma.so.1   objs/amcQw_d.o   _14874_archive_1.so \
+_14923_archive_1.so _14924_archive_1.so _prev_archive_1.so  SIM_l.o      rmapats_mop.o \
+rmapats.o rmar.o rmar_nd.o  rmar_llvm_0_1.o rmar_llvm_0_0.o            -lvirsim -lerrorinf \
+-lsnpsmalloc -lvfs    -lvcsnew -lsimprofile -luclinative /usr/cad/synopsys/vcs/2023.03/linux64/lib/vcs_tls.o \
+-Wl,-whole-archive  -lvcsucli    -Wl,-no-whole-archive        _vcs_pli_stub_.o   \
+/usr/cad/synopsys/vcs/2023.03/linux64/lib/vcs_save_restore_new.o /usr/cad/synopsys/verdi/2023.03/share/PLI/VCS/LINUX64/pli.a \
+-ldl  -lc -lm -lpthread -ldl 
+../simv up to date
+make[1]: Leaving directory `/home/M14/chialiu0618/Accelerator/Accelerator/csrc'
+Command: /home/M14/chialiu0618/Accelerator/Accelerator/./simv +v2k -a vcs.log +define+GATE +define+ +neg_tchk
+Chronologic VCS simulator copyright 1991-2023
+Contains Synopsys proprietary information.
+Compiler version U-2023.03_Full64; Runtime version U-2023.03_Full64;  Jul 10 14:48 2025
+Doing SDF annotation ...... Done
+*Verdi* Loading libsscore_vcs202303.so
+FSDB Dumper for VCS, Release Verdi_U-2023.03, Linux x86_64/64bit, 02/16/2023
+(C) 1996 - 2023 by Synopsys, Inc.
+*Verdi* FSDB WARNING: The FSDB file already exists. Overwriting the FSDB file may crash the programs that are using this file.
+*Verdi* : Create FSDB file 'Accelerator_Functional_SYN.fsdb'
+*Verdi* : Begin traversing the scopes, layer (0).
+*Verdi* : Enable +mda dumping.
+*Verdi* : End of traversing.
+************************************************************
+                        Conv1 Layer                         
+     INPUT: 8 Channels * 9 Activations * 9 Weights          
+     OUTPUT: 8 Output Channels * 1 Pixel (after pooling)    
+************************************************************
+************************************************************
+                        SRAM Write!                        
+ Received Word:  = 0925284f34505504
+************************************************************
+************************************************************
+                       End of Case!                        
+ Output Channel No.:  =           0
+ Expected:  =     -115258,        9681,      -24458,      -17632
+ Quantized:  =        -113,           9,         -24,         -18
+ Received:  =           9 (Pooled)
+************************************************************
+************************************************************
+                       End of Case!                        
+ Output Channel No.:  =           1
+ Expected:  =      -45251,       38889,      -38764,         165
+ Quantized:  =         -45,          37,         -38,           0
+ Received:  =          37 (Pooled)
+************************************************************
+************************************************************
+                       End of Case!                        
+ Output Channel No.:  =           2
+ Expected:  =       41438,       -5125,      -30145,      -48913
+ Quantized:  =          40,          -6,         -30,         -48
+ Received:  =          40 (Pooled)
+************************************************************
+************************************************************
+                       End of Case!                        
+ Output Channel No.:  =           3
+ Expected:  =       64408,      -11085,      -68351,       81360
+ Quantized:  =          62,         -11,         -67,          79
+ Received:  =          79 (Pooled)
+************************************************************
+************************************************************
+                       End of Case!                        
+ Output Channel No.:  =           4
+ Expected:  =       10062,        4572,       53514,      -54807
+ Quantized:  =           9,           4,          52,         -54
+ Received:  =          52 (Pooled)
+************************************************************
+************************************************************
+                       End of Case!                        
+ Output Channel No.:  =           5
+ Expected:  =       82103,       24241,      -44373,       21796
+ Quantized:  =          80,          23,         -44,          21
+ Received:  =          80 (Pooled)
+************************************************************
+************************************************************
+                       End of Case!                        
+ Output Channel No.:  =           6
+ Expected:  =       56608,       87787,       23040,       62986
+ Quantized:  =          55,          85,          22,          61
+ Received:  =          85 (Pooled)
+************************************************************
+************************************************************
+                       End of Case!                        
+ Output Channel No.:  =           7
+ Expected:  =      -53663,        4151,      -24646,       -1738
+ Quantized:  =         -53,           4,         -25,          -2
+ Received:  =           4 (Pooled)
+************************************************************
+************************************************************
+                        Conv2 Layer                         
+     INPUT: 32 Channels * 9 Activations * 9 Weights         
+     OUTPUT: 8 Output Channels * 1 Pixel (after pooling)    
+************************************************************
+************************************************************
+                        SRAM Write!                        
+ Received Word:  = 6e12296800742c00
+************************************************************
+************************************************************
+                       End of Case!                        
+ Output Channel No.:  =           0
+ Expected:  =      -45227,      225625,      125226,     -228875
+ Quantized:  =         -23,         110,          61,        -112
+ Received:  =         110 (Pooled)
+************************************************************
+************************************************************
+                       End of Case!                        
+ Output Channel No.:  =           1
+ Expected:  =       13078,       19706,       38521,      -11643
+ Quantized:  =           6,           9,          18,          -6
+ Received:  =          18 (Pooled)
+************************************************************
+************************************************************
+                       End of Case!                        
+ Output Channel No.:  =           2
+ Expected:  =      -12403,       84406,     -142836,      -23017
+ Quantized:  =          -7,          41,         -70,         -12
+ Received:  =          41 (Pooled)
+************************************************************
+************************************************************
+                       End of Case!                        
+ Output Channel No.:  =           3
+ Expected:  =      213846,       53196,      -76178,      157070
+ Quantized:  =         104,          25,         -38,          76
+ Received:  =         104 (Pooled)
+************************************************************
+************************************************************
+                       End of Case!                        
+ Output Channel No.:  =           4
+ Expected:  =     -128581,     -117838,      -87487,      -40179
+ Quantized:  =         -63,         -58,         -43,         -20
+ Received:  =           0 (Pooled)
+************************************************************
+************************************************************
+                       End of Case!                        
+ Output Channel No.:  =           5
+ Expected:  =      239136,      -19904,      -47596,       90947
+ Quantized:  =         116,         -10,         -24,          44
+ Received:  =         116 (Pooled)
+************************************************************
+************************************************************
+                       End of Case!                        
+ Output Channel No.:  =           6
+ Expected:  =       44472,     -194042,      -41310,       91176
+ Quantized:  =          21,         -95,         -21,          44
+ Received:  =          44 (Pooled)
+************************************************************
+************************************************************
+                       End of Case!                        
+ Output Channel No.:  =           7
+ Expected:  =     -172399,     -104965,     -140772,      -61251
+ Quantized:  =         -85,         -52,         -69,         -30
+ Received:  =           0 (Pooled)
+************************************************************
+************************************************************
+                    Fully Connected Layer                   
+     INPUT: 72 Features * Weights                           
+     OUTPUT: 32 Features                                    
+************************************************************
+************************************************************
+                        SRAM Write!                        
+ Received Word:  = 1c0e381e1d29f0e8
+************************************************************
+************************************************************
+                        SRAM Write!                        
+ Received Word:  = 3936c327fecee8f9
+************************************************************
+************************************************************
+                        SRAM Write!                        
+ Received Word:  = f6f7f084b4f6b0b7
+************************************************************
+************************************************************
+                        SRAM Write!                        
+ Received Word:  = 1404043d13f0146d
+************************************************************
+************************************************************
+                       End of Case!                        
+ Output Column No.:  =           0
+ Expected:  =       29254,       58931,       -9325,       20790
+ Quantized:  =          28,          57,         -10,          20
+ Received:  =          28,          57,         -10,          20
+************************************************************
+************************************************************
+                       End of Case!                        
+ Output Column No.:  =           1
+ Expected:  =       15274,       56042,       -9191,        5052
+ Quantized:  =          14,          54,          -9,           4
+ Received:  =          14,          54,          -9,           4
+************************************************************
+************************************************************
+                       End of Case!                        
+ Output Column No.:  =           2
+ Expected:  =       58224,      -62013,      -15843,        4131
+ Quantized:  =          56,         -61,         -16,           4
+ Received:  =          56,         -61,         -16,           4
+************************************************************
+************************************************************
+                       End of Case!                        
+ Output Column No.:  =           3
+ Expected:  =       30879,       40868,     -126576,       62685
+ Quantized:  =          30,          39,        -124,          61
+ Received:  =          30,          39,        -124,          61
+************************************************************
+************************************************************
+                       End of Case!                        
+ Output Column No.:  =           4
+ Expected:  =       30645,       -1798,      -76865,       20181
+ Quantized:  =          29,          -2,         -76,          19
+ Received:  =          29,          -2,         -76,          19
+************************************************************
+************************************************************
+                       End of Case!                        
+ Output Column No.:  =           5
+ Expected:  =       42816,      -50610,      -10105,      -15387
+ Quantized:  =          41,         -50,         -10,         -16
+ Received:  =          41,         -50,         -10,         -16
+************************************************************
+************************************************************
+                       End of Case!                        
+ Output Column No.:  =           6
+ Expected:  =      -15498,      -24462,      -81189,       20619
+ Quantized:  =         -16,         -24,         -80,          20
+ Received:  =         -16,         -24,         -80,          20
+************************************************************
+************************************************************
+                       End of Case!                        
+ Output Column No.:  =           7
+ Expected:  =      -23753,       -6934,      -73979,      112090
+ Quantized:  =         -24,          -7,         -73,         109
+ Received:  =         -24,          -7,         -73,         109
+************************************************************
+----------------------------------------------------------------------------------------------------------------------
+                                                  Congratulations!                                                    
+                                           You have passed all patterns!                                               
+                                           Your execution cycles =   209 cycles                                          
+                                           Your clock period = 2.0 ns                                                 
+                                           Total Latency = 418.0 ns                                                    
+----------------------------------------------------------------------------------------------------------------------
+$finish called from file "tb_accelerator_functional.sv", line 1089.
+$finish at simulation time            441000000
+           V C S   S i m u l a t i o n   R e p o r t 
+Time: 441000000 fs
+CPU Time:      0.860 seconds;       Data structure size:   0.9Mb
+Thu Jul 10 14:48:06 2025
+CPU time: 7.692 seconds to compile + .460 seconds to elab + .672 seconds to link + .917 seconds in simulation

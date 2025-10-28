@@ -1,0 +1,159 @@
+Command: vcs -timescale=1ns/1fs -j4 -sverilog +v2k -full64 -Mupdate -R -debug_access+all \
+-y /usr/cad/synopsys/synthesis/cur/dw/sim_ver/ +libext+.v -f filelist.f -o simv -l \
+vcs.log +define+RTL +define+ +notimingchecks
+*** Using c compiler gcc instead of cc ...
+                         Chronologic VCS (TM)
+         Version U-2023.03_Full64 -- Fri Jul 11 17:45:02 2025
+
+                    Copyright (c) 1991 - 2023 Synopsys, Inc.
+   This software and the associated documentation are proprietary to Synopsys,
+ Inc. This software may only be used in accordance with the terms and conditions
+ of a written license agreement with Synopsys, Inc. All other use, reproduction,
+   or distribution of this software is strictly prohibited.  Licensed Products
+     communicate with Synopsys servers for the purpose of providing software
+    updates, detecting software piracy and verifying that customers are using
+    Licensed Products in conformity with the applicable License Key for such
+  Licensed Products. Synopsys will use information gathered in connection with
+    this process to deliver software updates and pursue software pirates and
+                                   infringers.
+
+ Inclusivity & Diversity - Visit SolvNetPlus to read the "Synopsys Statement on
+            Inclusivity and Diversity" (Refer to article 000036315 at
+                        https://solvnetplus.synopsys.com)
+
+Parsing design file 'tb_FC.sv'
+Parsing included file '../Accelerator/Accelerator.sv'.
+Parsing included file '../Controller/Controller.sv'.
+Back to file '../Accelerator/Accelerator.sv'.
+Parsing included file '../Triangle_Buffer/Triangle_Buffer.sv'.
+Back to file '../Accelerator/Accelerator.sv'.
+Parsing included file '../Systolic_Array/Systolic_Array.sv'.
+Parsing included file '../Processing_Elements/Processing_Elements.sv'.
+Back to file '../Systolic_Array/Systolic_Array.sv'.
+Back to file '../Accelerator/Accelerator.sv'.
+Back to file 'tb_FC.sv'.
+Top Level Modules:
+       tb_FC
+TimeScale is 1 ns / 1 fs
+Starting vcs inline pass...
+
+
+Note-[VCS_PARAL] Parallel code-gen enabled
+  VCS is running with parallel code generation(-j)...
+
+5 modules and 0 UDP read.
+recompiling module tb_FC
+	However, due to incremental compilation, only 1 module needs to be compiled. 
+make[1]: Entering directory `/home/M14/chialiu0618/Accelerator/Neural_Network/csrc' \
+
+rm -f _cuarc*.so _csrc*.so pre_vcsobj_*.so share_vcsobj_*.so
+if [ -x ../simv ]; then chmod a-x ../simv; fi
+g++  -o ../simv      -rdynamic  -Wl,-rpath='$ORIGIN'/simv.daidir -Wl,-rpath=./simv.daidir \
+-Wl,-rpath=/usr/cad/synopsys/vcs/2023.03/linux64/lib -L/usr/cad/synopsys/vcs/2023.03/linux64/lib \
+-Wl,-rpath-link=./  /usr/lib64/libnuma.so.1   objs/amcQw_d.o   _22232_archive_1.so \
+_22253_archive_1.so _prev_archive_1.so  SIM_l.o      rmapats_mop.o rmapats.o rmar.o \
+rmar_nd.o  rmar_llvm_0_1.o rmar_llvm_0_0.o            -lvirsim -lerrorinf -lsnpsmalloc \
+-lvfs    -lvcsnew -lsimprofile -luclinative /usr/cad/synopsys/vcs/2023.03/linux64/lib/vcs_tls.o \
+-Wl,-whole-archive  -lvcsucli    -Wl,-no-whole-archive        _vcs_pli_stub_.o   \
+/usr/cad/synopsys/vcs/2023.03/linux64/lib/vcs_save_restore_new.o /usr/cad/synopsys/verdi/2023.03/share/PLI/VCS/LINUX64/pli.a \
+-ldl  -lc -lm -lpthread -ldl 
+../simv up to date
+make[1]: Leaving directory `/home/M14/chialiu0618/Accelerator/Neural_Network/csrc' \
+
+Command: /home/M14/chialiu0618/Accelerator/Neural_Network/./simv +v2k +libext+.v -a vcs.log +define+RTL +define+ +notimingchecks
+Chronologic VCS simulator copyright 1991-2023
+Contains Synopsys proprietary information.
+Compiler version U-2023.03_Full64; Runtime version U-2023.03_Full64;  Jul 11 17:45 2025
+*Verdi* Loading libsscore_vcs202303.so
+FSDB Dumper for VCS, Release Verdi_U-2023.03, Linux x86_64/64bit, 02/16/2023
+(C) 1996 - 2023 by Synopsys, Inc.
+*Verdi* FSDB WARNING: The FSDB file already exists. Overwriting the FSDB file may crash the programs that are using this file.
+*Verdi* : Create FSDB file 'FC.fsdb'
+*Verdi* : Begin traversing the scopes, layer (0).
+*Verdi* : Enable +mda dumping.
+*Verdi* : End of traversing.
+************************************************************
+                           FC Layer                         
+     INPUT:   16 IFMAPS * 2 * 2 Pixels (Flattened)          
+     OUTPUT:      10 Output Features                        
+************************************************************
+************************************************************
+                        SRAM Write!                        
+ Received Word:  = f1ec04ffb3de833f
+************************************************************
+************************************************************
+                        SRAM Write!                        
+ Received Word:  = e8ff000000000000
+************************************************************
+************************************************************
+                        SRAM Write!                        
+ Received Word:  = 0000000000000000
+************************************************************
+************************************************************
+                        SRAM Write!                        
+ Received Word:  = 0000000000000000
+************************************************************
+************************************************************
+                       End of Case!                        
+ Output Feature No.:  =           0
+ Received:  =         -15
+************************************************************
+************************************************************
+                       End of Case!                        
+ Output Feature No.:  =           1
+ Received:  =         -20
+************************************************************
+************************************************************
+                       End of Case!                        
+ Output Feature No.:  =           2
+ Received:  =           4
+************************************************************
+************************************************************
+                       End of Case!                        
+ Output Feature No.:  =           3
+ Received:  =          -1
+************************************************************
+************************************************************
+                       End of Case!                        
+ Output Feature No.:  =           4
+ Received:  =         -77
+************************************************************
+************************************************************
+                       End of Case!                        
+ Output Feature No.:  =           5
+ Received:  =         -34
+************************************************************
+************************************************************
+                       End of Case!                        
+ Output Feature No.:  =           6
+ Received:  =        -125
+************************************************************
+************************************************************
+                       End of Case!                        
+ Output Feature No.:  =           7
+ Received:  =          63
+************************************************************
+************************************************************
+                       End of Case!                        
+ Output Feature No.:  =           8
+ Received:  =         -24
+************************************************************
+************************************************************
+                       End of Case!                        
+ Output Feature No.:  =           9
+ Received:  =          -1
+************************************************************
+----------------------------------------------------------------------------------------------------------------------
+                                                  Congratulations!                                                    
+                                           You have passed all patterns!                                               
+                                           Your execution cycles =    56 cycles                                          
+                                           Your clock period = 2.0 ns                                                 
+                                           Total Latency = 112.0 ns                                                    
+----------------------------------------------------------------------------------------------------------------------
+$finish called from file "tb_FC.sv", line 505.
+$finish at simulation time            127000000
+           V C S   S i m u l a t i o n   R e p o r t 
+Time: 127000000 fs
+CPU Time:      0.570 seconds;       Data structure size:   0.9Mb
+Fri Jul 11 17:45:07 2025
+CPU time: 1.721 seconds to compile + .637 seconds to elab + .503 seconds to link + .613 seconds in simulation
