@@ -83,9 +83,19 @@ The design focuses on minimizing off-chip memory access through **cyclic weight 
 
 ## 📚 References
 
-- [Chen et al., “Eyeriss: An Energy-Efficient Reconfigurable Accelerator for Deep CNNs,” ISSCC 2016]  
-- [Kung, “Systolic Arrays for VLSI,” 1982]  
-- [Synopsys Design Compiler User Guide]  
+[1] Y.-H. Chen, T. Krishna, J. S. Emer, and V. Sze,  
+“**Eyeriss: An Energy-Efficient Reconfigurable Accelerator for Deep Convolutional Neural Networks**,”  
+*IEEE Journal of Solid-State Circuits*, vol. 52, no. 1, pp. 127–138, Jan. 2017.  
+DOI: [10.1109/JSSC.2016.2616357](https://doi.org/10.1109/JSSC.2016.2616357)
+
+[2] N. P. Jouppi *et al.*,  
+“**In-Datacenter Performance Analysis of a Tensor Processing Unit**,”  
+*Proceedings of the 44th Annual International Symposium on Computer Architecture (ISCA)*, pp. 1–12, 2017.  
+DOI: [10.1145/3079856.3080246](https://doi.org/10.1145/3079856.3080246)
+
+[3] Xilinx Inc.,  
+“**DPUCADX8G IP Core Product Brief: Deep Learning Processor Unit (DPU) for Alveo U200/U250**,”  
+2020. [Online]. Available: [https://docs.amd.com/r/1.2-English/ug1414-vitis-ai/Alveo-U200/U250-DPUCADX8G](https://docs.amd.com/r/1.2-English/ug1414-vitis-ai/Alveo-U200/U250-DPUCADX8G)
 
 ---
 
