@@ -3,8 +3,10 @@ set -euo pipefail
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 usage() {
     cat <<'HELP'
-Usage: ./run.sh [regfiles|triangle|systolic|functional|network|all|help]
+Usage: ./run.sh [regfiles|controller|prefetch|triangle|systolic|functional|network|all|help]
   regfiles    Byte-masked shared weight storage test (Icarus Verilog)
+  controller  Independent packet decoder and pipeline test (Verilator)
+  prefetch    Serial versus overlapped Conv/FC test (Verilator)
   triangle    Triangle buffer test (Verilator)
   systolic    Systolic array test (Verilator)
   functional  Accelerator functional test (Verilator; default)
@@ -69,11 +71,13 @@ network() {
 run_target() {
     case "$1" in
         regfiles) regfiles ;;
+        controller) run_verilator tb_Controller tb/unit/tb_Controller.sv controller "$ROOT/build/controller/run" ;;
+        prefetch) run_verilator tb_prefetch tb/integration/tb_prefetch.sv prefetch "$ROOT/build/prefetch/run" ;;
         triangle) run_verilator tb_Triangle_Buffer tb/unit/tb_Triangle_Buffer.sv triangle "$ROOT/build/triangle/run" ;;
         systolic) run_verilator tb_Systolic_Array tb/unit/tb_Systolic_Array.sv systolic "$ROOT/build/systolic/run" ;;
         functional) run_verilator tb_accelerator_functional tb/integration/tb_accelerator_functional.sv functional "$ROOT/build/functional/run" ;;
         network) network ;;
-        all) for target in regfiles triangle systolic functional network; do run_target "$target"; done ;;
+        all) for target in regfiles controller prefetch triangle systolic functional network; do run_target "$target"; done ;;
         help|-h|--help) usage ;;
         *) usage >&2; exit 2 ;;
     esac

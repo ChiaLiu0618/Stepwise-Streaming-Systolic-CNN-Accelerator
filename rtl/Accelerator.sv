@@ -4,7 +4,7 @@
 `include "Systolic_Array.sv"
 module Accelerator (
             input clk, rst_n,
-            input instruction_valid, input [15:0] instruction,
+            input instruction_valid, input Instructions::instruction_t instruction,
         
             input signed [7:0] SRAM_activation [0:3][0:3][0:7],
             input signed [7:0] SRAM_weight_data [0:8][0:7],     // a page of weights to load regfile
@@ -21,9 +21,10 @@ wire load_bias;
 wire load_scale;
 wire load_weight;              // load new weights
 wire [4:0] weight_idx;         // index to load regfile
-wire shift_activation;
+wire load_activation_bank;
+wire activation_bank;
 
-reg signed [7:0] activation_window [0:3][0:3][0:7];     // INT8, 4 by 4 window, from 8 input channels
+reg signed [7:0] activation_window [0:1][0:3][0:3][0:7];     // Two INT8 windows: independent load and compute banks
 reg [2:0] activation_channel;      // 0~7 activation windows for different input channels
 wire load_activation;
 
@@ -71,6 +72,8 @@ Controller C1 (.clk(clk), .rst_n(rst_n),
                 .load_weight(load_weight),
                 .weight_idx(weight_idx),
                 .load_activation(load_activation),
+                .load_activation_bank(load_activation_bank),
+                .activation_bank(activation_bank),
 
                 .input_valid(input_valid),
                 .activation_channel(activation_channel),
@@ -78,95 +81,82 @@ Controller C1 (.clk(clk), .rst_n(rst_n),
                 .MAC_end(MAC_end), .ReLU(ReLU), .Pool(Pool)
                 );
 
-// Activation Window
+// Compute captures the selected old window at the edge; a load updates its
+// destination after the edge. Use the other bank to prefetch multiple cycles ahead.
 always @(posedge clk or negedge rst_n) begin
-    if(!rst_n) begin
-        for(i=0; i<4; i=i+1) begin          // row
-            for(j=0; j<4; j=j+1) begin      // column
-                for(m=0; m<8; m=m+1) begin
-                    activation_window[i][j][m] <= 8'b0;
-                end
-            end 
-        end
-    end
-    else if(load_activation) begin
-        for(i=0; i<4; i=i+1) begin
-            for(j=0; j<4; j=j+1) begin
-                for(m=0; m<8; m=m+1) begin
-                    activation_window[i][j][m] <= SRAM_activation[i][j][m];     // new activations
-                end
-            end 
-        end
-    end
-    else begin
-        for(i=0; i<4; i=i+1) begin
-            for(j=0; j<4; j=j+1) begin
-                for(m=0; m<8; m=m+1) begin
-                    activation_window[i][j][m] <= activation_window[i][j][m];
-                end
-            end 
-        end
+    if (!rst_n) begin
+        for (int bank = 0; bank < 2; bank++)
+            for (int row = 0; row < 4; row++)
+                for (int col = 0; col < 4; col++)
+                    for (int channel = 0; channel < 8; channel++)
+                        activation_window[bank][row][col][channel] <= '0;
+    end else if (load_activation) begin
+        for (int row = 0; row < 4; row++)
+            for (int col = 0; col < 4; col++)
+                for (int channel = 0; channel < 8; channel++)
+                    activation_window[load_activation_bank][row][col][channel]
+                        <= SRAM_activation[row][col][channel];
     end
 end
 
 always @(*) begin
     if(mode) begin      // Fully Connect
         for(m=0; m<4; m=m+1) begin
-            input_data[m][0] = activation_window[0][0][activation_channel];
-            input_data[m][1] = activation_window[0][1][activation_channel];
-            input_data[m][2] = activation_window[0][2][activation_channel];
-            input_data[m][3] = activation_window[1][0][activation_channel];
-            input_data[m][4] = activation_window[1][1][activation_channel];
-            input_data[m][5] = activation_window[1][2][activation_channel];
-            input_data[m][6] = activation_window[2][0][activation_channel];
-            input_data[m][7] = activation_window[2][1][activation_channel];
-            input_data[m][8] = activation_window[2][2][activation_channel];
+            input_data[m][0] = activation_window[activation_bank][0][0][activation_channel];
+            input_data[m][1] = activation_window[activation_bank][0][1][activation_channel];
+            input_data[m][2] = activation_window[activation_bank][0][2][activation_channel];
+            input_data[m][3] = activation_window[activation_bank][1][0][activation_channel];
+            input_data[m][4] = activation_window[activation_bank][1][1][activation_channel];
+            input_data[m][5] = activation_window[activation_bank][1][2][activation_channel];
+            input_data[m][6] = activation_window[activation_bank][2][0][activation_channel];
+            input_data[m][7] = activation_window[activation_bank][2][1][activation_channel];
+            input_data[m][8] = activation_window[activation_bank][2][2][activation_channel];
         end
     end
     else begin          // Convolution
         // Core 1
-        input_data[0][0] = activation_window[0][0][activation_channel];
-        input_data[0][1] = activation_window[0][1][activation_channel];
-        input_data[0][2] = activation_window[0][2][activation_channel];
-        input_data[0][3] = activation_window[1][0][activation_channel];
-        input_data[0][4] = activation_window[1][1][activation_channel];
-        input_data[0][5] = activation_window[1][2][activation_channel];
-        input_data[0][6] = activation_window[2][0][activation_channel];
-        input_data[0][7] = activation_window[2][1][activation_channel];
-        input_data[0][8] = activation_window[2][2][activation_channel];
+        input_data[0][0] = activation_window[activation_bank][0][0][activation_channel];
+        input_data[0][1] = activation_window[activation_bank][0][1][activation_channel];
+        input_data[0][2] = activation_window[activation_bank][0][2][activation_channel];
+        input_data[0][3] = activation_window[activation_bank][1][0][activation_channel];
+        input_data[0][4] = activation_window[activation_bank][1][1][activation_channel];
+        input_data[0][5] = activation_window[activation_bank][1][2][activation_channel];
+        input_data[0][6] = activation_window[activation_bank][2][0][activation_channel];
+        input_data[0][7] = activation_window[activation_bank][2][1][activation_channel];
+        input_data[0][8] = activation_window[activation_bank][2][2][activation_channel];
 
         // Core 2
-        input_data[1][0] = activation_window[0][1][activation_channel];
-        input_data[1][1] = activation_window[0][2][activation_channel];
-        input_data[1][2] = activation_window[0][3][activation_channel];
-        input_data[1][3] = activation_window[1][1][activation_channel];
-        input_data[1][4] = activation_window[1][2][activation_channel];
-        input_data[1][5] = activation_window[1][3][activation_channel];
-        input_data[1][6] = activation_window[2][1][activation_channel];
-        input_data[1][7] = activation_window[2][2][activation_channel];
-        input_data[1][8] = activation_window[2][3][activation_channel];
+        input_data[1][0] = activation_window[activation_bank][0][1][activation_channel];
+        input_data[1][1] = activation_window[activation_bank][0][2][activation_channel];
+        input_data[1][2] = activation_window[activation_bank][0][3][activation_channel];
+        input_data[1][3] = activation_window[activation_bank][1][1][activation_channel];
+        input_data[1][4] = activation_window[activation_bank][1][2][activation_channel];
+        input_data[1][5] = activation_window[activation_bank][1][3][activation_channel];
+        input_data[1][6] = activation_window[activation_bank][2][1][activation_channel];
+        input_data[1][7] = activation_window[activation_bank][2][2][activation_channel];
+        input_data[1][8] = activation_window[activation_bank][2][3][activation_channel];
 
         // Core 3
-        input_data[2][0] = activation_window[1][0][activation_channel];
-        input_data[2][1] = activation_window[1][1][activation_channel];
-        input_data[2][2] = activation_window[1][2][activation_channel];
-        input_data[2][3] = activation_window[2][0][activation_channel];
-        input_data[2][4] = activation_window[2][1][activation_channel];
-        input_data[2][5] = activation_window[2][2][activation_channel];
-        input_data[2][6] = activation_window[3][0][activation_channel];
-        input_data[2][7] = activation_window[3][1][activation_channel];
-        input_data[2][8] = activation_window[3][2][activation_channel];
+        input_data[2][0] = activation_window[activation_bank][1][0][activation_channel];
+        input_data[2][1] = activation_window[activation_bank][1][1][activation_channel];
+        input_data[2][2] = activation_window[activation_bank][1][2][activation_channel];
+        input_data[2][3] = activation_window[activation_bank][2][0][activation_channel];
+        input_data[2][4] = activation_window[activation_bank][2][1][activation_channel];
+        input_data[2][5] = activation_window[activation_bank][2][2][activation_channel];
+        input_data[2][6] = activation_window[activation_bank][3][0][activation_channel];
+        input_data[2][7] = activation_window[activation_bank][3][1][activation_channel];
+        input_data[2][8] = activation_window[activation_bank][3][2][activation_channel];
 
         // Core 4
-        input_data[3][0] = activation_window[1][1][activation_channel];
-        input_data[3][1] = activation_window[1][2][activation_channel];
-        input_data[3][2] = activation_window[1][3][activation_channel];
-        input_data[3][3] = activation_window[2][1][activation_channel];
-        input_data[3][4] = activation_window[2][2][activation_channel];
-        input_data[3][5] = activation_window[2][3][activation_channel];
-        input_data[3][6] = activation_window[3][1][activation_channel];
-        input_data[3][7] = activation_window[3][2][activation_channel];
-        input_data[3][8] = activation_window[3][3][activation_channel];
+        input_data[3][0] = activation_window[activation_bank][1][1][activation_channel];
+        input_data[3][1] = activation_window[activation_bank][1][2][activation_channel];
+        input_data[3][2] = activation_window[activation_bank][1][3][activation_channel];
+        input_data[3][3] = activation_window[activation_bank][2][1][activation_channel];
+        input_data[3][4] = activation_window[activation_bank][2][2][activation_channel];
+        input_data[3][5] = activation_window[activation_bank][2][3][activation_channel];
+        input_data[3][6] = activation_window[activation_bank][3][1][activation_channel];
+        input_data[3][7] = activation_window[activation_bank][3][2][activation_channel];
+        input_data[3][8] = activation_window[activation_bank][3][3][activation_channel];
     end
 end
 

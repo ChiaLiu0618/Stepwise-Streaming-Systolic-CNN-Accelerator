@@ -13,7 +13,8 @@ module tb_CONV3;
 // Output Registers
 reg clk, rst_n;
 reg instruction_valid;
-reg [15:0] instruction;
+import Instructions::*;
+instruction_t instruction;
 
 reg signed [7:0] SRAM_weight_data [0:8][0:7];      // INT8, 9 by 8 set of weights
 reg signed [15:0] SRAM_bias_data [0:3][0:7];
@@ -51,11 +52,6 @@ integer outfile;
 integer file, row, col, page, r, temp;
 
 // ISA
-parameter NO_OP = 3'b000;                      // No operation
-parameter LOAD = 3'b001;                // Change operation modes Conv or Fully Connect
-         // {mode[15:13], Change Mode[12], Operation Mode[11], Load Weight[10], Weight idx[9:5], Load Param[4], 4'b0}    // 0 = Conv, 1 = FC
-parameter MAC_COMPUTE = 3'b010;                
-         // {mode[15:13], Activation Channel[12:10], Weight idx[9:5], MAC[4], Store[3], ReLU[2], Pool[1], Load Activation[0]}
 //---------------------------------------------------------------------
 //   REG & WIRE DECLARATION
 //---------------------------------------------------------------------
@@ -124,11 +120,11 @@ initial begin
     // end 
 
     instruction_valid = 1'b1;
-    instruction = {LOAD, 3'b0, 5'b0, 1'b1, 1'b0, 1'b0, 1'b0, 1'b0};  
+    instruction = pack_instruction(memory_op(5'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b1, 1'b0), '0);  
         // change mode to Conv, don't load weight, don't load bias and scale
     @(negedge clk);
     instruction_valid = 1'b0;
-    instruction = {NO_OP, 13'b0};
+    instruction = '0;
 
     i_pat = 0;
     @(negedge clk);
@@ -350,7 +346,7 @@ task input_conv3_param_tile1_task; begin
     @(negedge clk);
     weight_idx = 0;
     instruction_valid = 1'b1;
-    instruction = {LOAD, 3'b0, weight_idx, 1'b0, 1'b0, 1'b1, 1'b0, 1'b0};
+    instruction = pack_instruction(memory_op(weight_idx, 1'b1, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0), '0);
         // don't change mode, load weight, don't load bias and scale
 
     for(m=0; m<16; m=m+1) begin      // 16 pages of weights
@@ -361,17 +357,17 @@ task input_conv3_param_tile1_task; begin
         end
         @(negedge clk);
         weight_idx = weight_idx + 1;
-        instruction = {LOAD, 3'b0, weight_idx, 1'b0, 1'b0, 1'b1, 1'b0, 1'b0};
+        instruction = pack_instruction(memory_op(weight_idx, 1'b1, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0), '0);
         // don't change mode, load weight, don't load bias and scale
     end
 
     instruction_valid = 1'b0;
-    instruction = {NO_OP, 13'b0};
+    instruction = '0;
     weight_idx = 0;
     
     @(negedge clk);
     instruction_valid = 1'b1;
-    instruction = {LOAD, 3'b0, 5'b0, 1'b0, 1'b0, 1'b0, 1'b1, 1'b1};  
+    instruction = pack_instruction(memory_op(5'b0, 1'b0, 1'b1, 1'b1, 1'b0, 1'b0, 1'b0, 1'b0), '0);  
         // don't change mode, don't load weight, load bias and scale
 
     for(m=0; m<4; m=m+1) begin
@@ -384,14 +380,14 @@ task input_conv3_param_tile1_task; begin
 
     @(negedge clk);
     instruction_valid = 1'b0;
-    instruction = {NO_OP, 13'b0};
+    instruction = '0;
 end endtask
 
 task input_conv3_param_tile2_task; begin
     @(negedge clk);
     weight_idx = 0;
     instruction_valid = 1'b1;
-    instruction = {LOAD, 3'b0, weight_idx, 1'b0, 1'b0, 1'b1, 1'b0, 1'b0};
+    instruction = pack_instruction(memory_op(weight_idx, 1'b1, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0), '0);
         // don't change mode, load weight, don't load bias and scale
 
     for(m=0; m<16; m=m+1) begin      // 16 pages of weights
@@ -402,17 +398,17 @@ task input_conv3_param_tile2_task; begin
         end
         @(negedge clk);
         weight_idx = weight_idx + 1;
-        instruction = {LOAD, 3'b0, weight_idx, 1'b0, 1'b0, 1'b1, 1'b0, 1'b0};
+        instruction = pack_instruction(memory_op(weight_idx, 1'b1, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0), '0);
             // don't change mode, load weight, don't load bias and scale
     end
 
     instruction_valid = 1'b0;
-    instruction = {NO_OP, 13'b0};
+    instruction = '0;
     weight_idx = 0;
     
     @(negedge clk);
     instruction_valid = 1'b1;
-    instruction = {LOAD, 3'b0, 5'b0, 1'b0, 1'b0, 1'b0, 1'b1, 1'b1};  
+    instruction = pack_instruction(memory_op(5'b0, 1'b0, 1'b1, 1'b1, 1'b0, 1'b0, 1'b0, 1'b0), '0);  
         // don't change mode, don't load weight, load bias and scale
 
     for(m=0; m<4; m=m+1) begin
@@ -425,13 +421,13 @@ task input_conv3_param_tile2_task; begin
 
     @(negedge clk);
     instruction_valid = 1'b0;
-    instruction = {NO_OP, 13'b0};
+    instruction = '0;
 end endtask
 
 task input_conv3_activation_task; begin
     @(negedge clk);
     instruction_valid = 1'b1;
-    instruction = {MAC_COMPUTE, 3'b0, 5'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b1};
+    instruction = pack_instruction(memory_op(5'b0, 1'b0, 1'b0, 1'b0, 1'b1, 1'b0, 1'b0, 1'b0), compute_op(3'b0, 5'b0, 1'b0, 1'b0, 1'b0, 1'b0, 1'b0));
         // Dont't compute, Don't store, No ReLU, No Pool, Load Activation
 
     // GENERATE ACTIVATION
@@ -459,7 +455,7 @@ task input_conv3_activation_task; begin
 
     @(negedge clk);
     instruction_valid = 1'b0;
-    instruction = {NO_OP, 13'b0};
+    instruction = '0;
 end endtask
 
 task input_conv3_task; begin
@@ -470,11 +466,11 @@ task input_conv3_task; begin
 
         if(m==15) begin     // input first 8 channels of next pixel
             if((i_pixel == 1) && (j_pixel == 1)) begin      // last pixel
-                instruction = {MAC_COMPUTE, activation_channel, weight_idx, 1'b1, 1'b1, 1'b1, 1'b1, 1'b0};
+                instruction = pack_instruction('0, compute_op(activation_channel, weight_idx, 1'b1, 1'b1, 1'b1, 1'b1, 1'b0));
                     // Compute, Store, ReLU, Pool, Don't Load Activation
             end
             else begin
-                instruction = {MAC_COMPUTE, activation_channel, weight_idx, 1'b1, 1'b1, 1'b1, 1'b1, 1'b1};
+                instruction = pack_instruction(memory_op(5'b0, 1'b0, 1'b0, 1'b0, 1'b1, 1'b0, 1'b0, 1'b0), compute_op(activation_channel, weight_idx, 1'b1, 1'b1, 1'b1, 1'b1, 1'b0));
                     // Compute, Store, ReLU, Pool, Load Activation
 
                 // GENERATE ACTIVATION
@@ -511,7 +507,7 @@ task input_conv3_task; begin
             end
         end
         else if(m==7) begin     // Load next 8 input channels
-            instruction = {MAC_COMPUTE, activation_channel, weight_idx, 1'b1, 1'b0, 1'b0, 1'b0, 1'b1};
+            instruction = pack_instruction(memory_op(5'b0, 1'b0, 1'b0, 1'b0, 1'b1, 1'b0, 1'b0, 1'b0), compute_op(activation_channel, weight_idx, 1'b1, 1'b0, 1'b0, 1'b0, 1'b0));
                 // Compute, Don't Store, No ReLU, No Pool, Load Activation
 
             // GENERATE ACTIVATION
@@ -538,12 +534,12 @@ task input_conv3_task; begin
             end
         end
         else begin
-            instruction = {MAC_COMPUTE, activation_channel, weight_idx, 1'b1, 1'b0, 1'b0, 1'b0, 1'b0};
+            instruction = pack_instruction('0, compute_op(activation_channel, weight_idx, 1'b1, 1'b0, 1'b0, 1'b0, 1'b0));
                 // Compute, Don't Store, No ReLU, No Pool, Don't Load Activation
         end
         @(negedge clk);
         instruction_valid = 1'b0;
-        instruction = {NO_OP, 13'b0};
+        instruction = '0;
     end
 end endtask
 

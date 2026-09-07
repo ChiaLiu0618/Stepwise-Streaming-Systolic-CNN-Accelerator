@@ -1,0 +1,110 @@
+Packed memory / compute instruction
+==================================
+
+The top-level instruction is Instructions::instruction_t, a packed 32-bit
+value. Memory occupies bits 31:16; compute occupies bits 15:0. This replaces
+the old 16-bit opcode interface; external instruction generators must migrate.
+Instructions.sv defines the types and construction helpers.
+
+Memory field (packet bits):
+  31       enable
+  30:28    reserved (write zero)
+  27       set_mode
+  26       fc_mode (0 = convolution, 1 = fully connected)
+  25       load_weight
+  24       load_bias
+  23       load_scale
+  22       load_activation
+  21       activation_bank (load destination)
+  20:16    weight_addr (load destination, 0..31)
+
+Compute field (packet bits):
+  15       enable
+  14:13    reserved (write zero)
+  12       activation_bank (compute source)
+  11:9     activation_channel (0..7)
+  8:4      weight_addr (compute source: Conv 0..31, FC 0..7)
+  3        mac (issue one activation channel)
+  2        store_result (finish accumulation / schedule output)
+  1        relu
+  0        pool
+
+instruction_valid gates both fields. Each field has an additional enable;
+either field may be a no-op independently. An all-zero packet is a no-op.
+Reserved bits are ignored by the decoder. Memory_Controller handles loads
+and mode; Compute_Controller handles MAC launch and the existing delayed
+weight, result, ReLU, and pool controls. The memory address never enters the
+compute weight pipeline. Fields are issued together on a rising edge; this
+is independent control, not independently stalled instruction queues.
+
+Memory timing and prefetch rules
+-------------------------------
+- SRAM input data must already be valid on the load edge. The interface
+  has no request/response handshake or DMA engine. Account for external
+  memory latency before issuing a load field.
+- Activation storage has two 128-byte banks. Load bank 1 while computing
+  from bank 0, then select bank 1 in a later compute field (and vice versa).
+  Same-edge load/compute to one bank computes the OLD value; the new value
+  is available on the next edge. This preserves existing window streaming.
+- Weights retain their 72 x (8 x 32-bit) shared regfiles and byte-write
+  mapping. Prefetch only logical pages not needed by ANY in-flight PE.
+  A systolic wave reads weights over several cycles, not just at issue.
+  In FC, a compute base n uses pages n, n+8, n+16, and n+24.
+- Bias loads also initialize accumulators; bias, scale, and mode are not
+  double-buffered. Change these only after outstanding computation and
+  output serialization finish. Do not combine them with active compute.
+- No hardware scoreboard, interlock, or automatic bank swap is provided.
+  The instruction scheduler owns the above dependencies. Bank selection
+  does not create separate accumulator contexts; finish the current
+  accumulation before starting an independent result.
+- Existing result timing and output bandwidth are unchanged. The packet
+  enables overlapped transfers; it does not increase MAC issue bandwidth.
+
+Constructor argument order
+--------------------------
+memory_op(weight_addr, load_weight, load_bias, load_scale,
+          load_activation, activation_bank, set_mode, fc_mode)
+compute_op(activation_channel, weight_addr, mac, store_result,
+           relu, pool, activation_bank)
+pack_instruction(memory_field, compute_field)
+The helpers zero reserved bits and derive each enable from its action bits.
+Named struct assignments are also supported, including explicitly disabling
+one field without changing its remaining bits.
+
+Example (SystemVerilog)
+----------------------
+import Instructions::*;
+instruction_t instruction;
+
+// Compute channel 3 from activation bank 0 / weight page 2 while loading
+// activation bank 1 and unused weight page 7 from the SRAM data ports.
+instruction = '0;
+instruction.mem.enable = 1;
+instruction.mem.load_weight = 1;
+instruction.mem.weight_addr = 7;
+instruction.mem.load_activation = 1;
+instruction.mem.activation_bank = 1;
+instruction.ops.enable = 1;
+instruction.ops.mac = 1;
+instruction.ops.activation_channel = 3;
+instruction.ops.weight_addr = 2;
+instruction.ops.activation_bank = 0;
+
+// Equivalent constructor form:
+instruction = pack_instruction(
+    memory_op(5'd7, 1, 0, 0, 1, 1, 0, 0),
+    compute_op(3'd3, 5'd2, 1, 0, 0, 0, 0)
+);
+
+Verification
+------------
+./run.sh controller : 300 deterministic randomized cycles covering the two
+field enables, global valid, reset during traffic, mode, independent load
+and compute addresses/banks, and all delayed compute-control outputs.
+./run.sh prefetch : serial and overlapped schedules for Conv and FC. Checks
+20 output words against an independent integer model and against serial
+execution, including activation bank switching and next-page weight reuse.
+The tested overlap eliminates 1 memory-only issue cycle for Conv and 4 for
+FC. These are schedule-specific savings, not a measured chip throughput gain.
+./run.sh all : also runs the original block, functional, and layer tests,
+whose stimulus has been migrated to the packed interface.

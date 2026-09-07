@@ -5,7 +5,7 @@ by the corresponding PEs across the four systolic arrays: 72 files total.
 
 Recommended depth: 8 entries of 32 bits (four INT8 weights).
 Capacity: 32 bytes per file, 2304 bytes total, unchanged from the old bank.
-The current five-bit weight page index maps to:
+The five-bit weight page address in each packed instruction field maps to:
   entry = page[2:0]
   byte lane = page[4:3]
 Loading one page writes only its selected byte lane in each file.
