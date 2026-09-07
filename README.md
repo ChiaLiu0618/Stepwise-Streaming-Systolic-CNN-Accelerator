@@ -409,10 +409,11 @@ area, and results from different cell libraries are not directly comparable.
 
 ### Current revision: Nangate45 synthesis estimate
 
-The current RTL was mapped with sv2v → Yosys/ABC and analyzed with OpenSTA,
-using the installed tools and Nangate45 library from the local Mixed
-Precision Conference project. The final mapping includes buffering and
-cell sizing with explicit drive/load constraints.
+The current RTL was converted with sv2v, synthesized and mapped with
+Yosys/ABC, and analyzed with OpenSTA against the Nangate45 typical
+standard-cell library. The mapping includes buffering and cell sizing with
+explicit input-drive and output-load constraints. A zero-delay simulation
+of the mapped gate netlist checks the same Conv/FC outputs as the RTL test.
 
 | Current-revision result | Value |
 |:--|:--|
@@ -439,24 +440,11 @@ buffering, placement, and routing. Macro integration must preserve—or
 explicitly adapt—the current combinational reads, byte write enables, and
 reset behavior; it is not a drop-in area correction to this estimate.
 
-Reproduce the flow with:
-
-```sh
-./synth.sh
-```
-
-The default dependency location is `~/Desktop/Mixed Precision Conference`.
-For another installation, specify the library and OpenSTA executable:
-
-```sh
-LIBERTY_PATH=/path/to/NangateOpenCellLibrary_typical.lib \
-STA_BIN=/path/to/sta ./synth.sh
-```
-
-`sv2v`, `yosys`, `iverilog`, and `vvp` must also be on `PATH`. The gate
-netlist is large; its Icarus compilation can take several minutes. Reports,
-netlists, functional cell models, and dependency copies remain under ignored
-`build/synthesis/`. See [synthesis constraints and provenance](docs/synthesis.txt).
+The synthesis flow records tool and library hashes along with the mapped
+area and timing reports. Generated libraries, netlists, binaries, and
+reports remain under ignored `build/synthesis/`. See
+[synthesis constraints and provenance](docs/synthesis.txt) for the exact
+method and limitations.
 
 ### Integer-operation counting
 
