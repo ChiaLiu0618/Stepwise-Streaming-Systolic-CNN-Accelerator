@@ -100,9 +100,14 @@ DOI: [10.1145/3079856.3080246](https://doi.org/10.1145/3079856.3080246)
 
 ---
 
-## 🧾 License
+## Source files and simulation inputs
 
-Due to copyright restrictions, this repository includes only the synthesis and simulation results.
+The `Accelerator/` directory contains the SystemVerilog RTL and testbenches.
+`Accelerator/Neural_Network/` also contains the input image and quantized weights.
+
+Run the layer testbenches from `Accelerator/Neural_Network/` in this order: `tb_CONV1`, `tb_CONV2`, `tb_CONV3`, then `tb_FC`. Each convolution testbench writes feature-map text files consumed by the next layer. These generated maps are excluded from version control.
+
+Technology libraries, SRAM compiler files, tool configuration, generated binaries, waveforms, reports, and logs are excluded. The `.gitignore` explicitly allows only the reviewed source and input files, plus this README and the ignore rules.
 
 ---
 
