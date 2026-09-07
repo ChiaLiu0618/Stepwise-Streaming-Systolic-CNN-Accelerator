@@ -28,6 +28,13 @@ not characterized by this run. No placement, CTS, routing, wire parasitics,
 physical design checks, switching-activity analysis, or power estimation.
 
 Area is the sum of mapped Liberty cell areas, not core/die area.
+The weight regfiles are implemented as flip-flops and selection/control
+logic rather than dedicated register-file or SRAM macros. A compatible
+macro could reduce storage area, but no reduction has been measured.
+The final area must include macro interfaces and physical implementation
+overhead. Macro integration must address combinational read timing, byte
+write enables, and asynchronous reset semantics; a percentage reduction
+cannot be assumed from these synthesis results alone.
 The estimated clock limit is not measured silicon performance. It must
 not be presented as an achieved 500 MHz implementation.
 

@@ -430,6 +430,15 @@ implementation, or power analysis. The minimum-period estimate is not a
 silicon frequency claim. Storage is mapped to standard cells, not SRAM
 macros.
 
+**Storage implementation affects area.** In this flow, the weight regfiles
+are synthesized into flip-flops, read-selection logic, and write-control
+logic rather than dedicated register-file or SRAM macros. Integrating a
+compatible memory macro could reduce storage area. The amount is not yet
+measured, and the total implemented area also depends on interface logic,
+buffering, placement, and routing. Macro integration must preserve—or
+explicitly adapt—the current combinational reads, byte write enables, and
+reset behavior; it is not a drop-in area correction to this estimate.
+
 Reproduce the flow with:
 
 ```sh
