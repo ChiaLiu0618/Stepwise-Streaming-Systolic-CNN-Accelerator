@@ -401,11 +401,10 @@ simulation does not establish silicon timing, area, power, or a general
 throughput improvement. The synthesis section below reports the current revision separately;
 physical implementation and power remain unmeasured.
 
-## Performance reporting: current and historical revisions
+## Synthesis results and operation counting
 
-Current synthesis results and their constraints are documented separately
-from the original ASIC implementation. A configured clock target is not a
-measured operating frequency. Post-synthesis cell area is not placed core
+The synthesis results below describe the current RTL and its constraints.
+A configured clock target is not a measured operating frequency. Post-synthesis cell area is not placed core
 area, and results from different cell libraries are not directly comparable.
 
 ### Current revision: Nangate45 synthesis estimate
@@ -429,7 +428,7 @@ These are **pre-layout estimates**, with an ideal clock and cell-pin loads.
 There is no placement, routed wiring, extracted parasitics, clock-tree
 implementation, or power analysis. The minimum-period estimate is not a
 silicon frequency claim. Storage is mapped to standard cells, not SRAM
-macros. This is not a like-for-like comparison with the older TSMC 40 nm area.
+macros.
 
 Reproduce the flow with:
 
@@ -464,22 +463,6 @@ For example, an assumed 500 MHz clock gives a theoretical ceiling of
 288 GOPS/s (144 GMAC/s). This assumes full utilization and excludes load,
 drain, and output overhead; it is not a measured throughput result or a
 claim that the current revision achieves 500 MHz.
-
-### Historical original implementation — not the current RTL
-
-| Previously reported metric | Original-flow value |
-|:--|:--|
-| Clock frequency | 500 MHz |
-| Post-synthesis area | 412.7 K µm² |
-| Target | TSMC 40 nm, nominal TT / 1.1 V / 25 °C |
-| Workload | Quantized MNIST Conv + FC network |
-
-These are retained as historical project records. The original proprietary
-flow has not been rerun for the packed-control and shared-regfile revision.
-The previous “129 GFLOPs/s (INT8-equivalent)” figure is retired from the
-performance table: its workload and operation-count definition are not
-reproduced here, and INT8 work should not be presented as floating-point
-operations. It is not used to claim performance for this revision.
 
 ## References
 

@@ -29,8 +29,7 @@ physical design checks, switching-activity analysis, or power estimation.
 
 Area is the sum of mapped Liberty cell areas, not core/die area.
 The estimated clock limit is not measured silicon performance. It must
-not be presented as an achieved 500 MHz implementation or compared directly
-to the historical TSMC 40 nm synthesis figures.
+not be presented as an achieved 500 MHz implementation.
 
 An initial mapping without ABC drive/load constraints exposed extreme
 mode-control fanout. The reported final mapping uses constrained ABC
