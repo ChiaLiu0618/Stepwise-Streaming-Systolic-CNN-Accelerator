@@ -22,6 +22,11 @@ module tb_prefetch;
     int serial_cycles [0:1];
     logic [63:0] reference_words [0:7];
     bit overlap;
+    int clock_cycles = 0;
+    int first_issue_cycle, last_output_cycle;
+    int serial_elapsed [0:1];
+    always @(posedge clk) clock_cycles++;
+
 
     // Independent integer model: four channels, nine products/channel,
     // activation 1 or 2, weight lane+1 or lane+2, arithmetic scale by 2.
@@ -41,6 +46,10 @@ module tb_prefetch;
             if (!overlap) reference_words[received] = write_data;
             else if (write_data !== reference_words[received])
                 $fatal(1, "prefetch differs from serial execution");
+            $display("DEMO_WORD mode=%s schedule=%s word=%0d data=%016h expected=%016h cycle=%0d",
+                     fc ? "FC" : "CONV", overlap ? "prefetch" : "serial",
+                     received, write_data, expected_word, clock_cycles-first_issue_cycle+1);
+            last_output_cycle = clock_cycles;
             received++;
             total_checked++;
         end
@@ -91,6 +100,7 @@ module tb_prefetch;
         repeat (2) @(negedge clk);
         #1 rst_n = 1;
         drive(memory_op(0, 0, 1, 1, 0, 0, 1, fc), '0);
+        first_issue_cycle = clock_cycles + 1;
         for (int page = 0; page < pages; page++) begin
             drive(memory_op(5'(8*page), 1, 0, 0, page == 0, 0, 0, 0), '0);
             set_weights(page+1);
@@ -118,9 +128,18 @@ module tb_prefetch;
             drive('0, compute_op(3'(channel), 1, 1, channel == 3, 0, !fc, 1));
         drain();
         if (received != (fc ? 8 : 2)) $fatal(1, "second job timed out");
-        if (!prefetch) serial_cycles[fc] = issue_cycles;
-        else if (serial_cycles[fc] - issue_cycles != pages)
-            $fatal(1, "prefetch did not eliminate the memory-only issue cycles");
+        if (!prefetch) begin
+            serial_cycles[fc] = issue_cycles;
+            serial_elapsed[fc] = last_output_cycle-first_issue_cycle+1;
+        end else begin
+            if (serial_cycles[fc] - issue_cycles != pages)
+                $fatal(1, "prefetch did not eliminate the memory-only issue cycles");
+            if (serial_elapsed[fc] - (last_output_cycle-first_issue_cycle+1) != pages)
+                $fatal(1, "elapsed-cycle savings differ from issue-cycle savings");
+        end
+        $display("DEMO_SUMMARY mode=%s schedule=%s active_packets=%0d issued_packets=%0d elapsed_cycles=%0d words=%0d",
+                 fc ? "FC" : "CONV", prefetch ? "prefetch" : "serial",
+                 issue_cycles-2, issue_cycles, last_output_cycle-first_issue_cycle+1, received);
     endtask
 
     initial begin

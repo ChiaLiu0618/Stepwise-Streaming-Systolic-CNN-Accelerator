@@ -1,0 +1,88 @@
+Current-revision synthesis and pre-layout timing
+===============================================
+
+Run date: 2026-09-07
+Top: Accelerator (all four 9 x 8 arrays)
+Includes packed memory/compute control, 72 shared weight regfiles, and two
+activation banks. All storage maps to standard cells; no SRAM macro model.
+
+Final mapping results
+---------------------
+Mapped area: 567472.164 square micrometers
+Mapped cells: 357599
+Sequential area: 189147.280 square micrometers (33.33%)
+Clock target: 2.0 ns (500 MHz)
+Worst setup slack: -0.28 ns (target NOT met)
+OpenSTA minimum period including port paths: 2.28 ns (438.80 MHz)
+Total negative setup slack: -264.10 ns
+
+Constraints and limits
+----------------------
+Library: NangateOpenCellLibrary_typical.lib, Nangate45, 1.1 V, 25 C.
+ABC mapping: 2000 ps target, BUF_X1 input driver, 5 fF output load;
+default constrained mapping includes buffering, upsizing, and downsizing.
+STA: 2.0 ns ideal clock, 0.05 ns uncertainty, max input/output delays 0.2 ns,
+min input/output delays 0 ns, input transition 0.05 ns, output load 5 fF.
+The asynchronous reset input is false-pathed; reset recovery/removal is
+not characterized by this run. No placement, CTS, routing, wire parasitics,
+physical design checks, switching-activity analysis, or power estimation.
+
+Area is the sum of mapped Liberty cell areas, not core/die area.
+The estimated clock limit is not measured silicon performance. It must
+not be presented as an achieved 500 MHz implementation or compared directly
+to the historical TSMC 40 nm synthesis figures.
+
+An initial mapping without ABC drive/load constraints exposed extreme
+mode-control fanout. The reported final mapping uses constrained ABC
+buffering and sizing; the initial unbuffered result is not the final result.
+Yosys final check -assert reports no structural problems. Intermediate
+warnings about conflicting loop-index drivers refer to discarded procedural
+loop variables i/j, not retained datapath registers. Register arrays are
+intentionally lowered to standard-cell storage.
+
+Reproduction
+------------
+./synth.sh
+
+Default dependency root: ~/Desktop/Mixed Precision Conference
+Override MIXED_PRECISION_ROOT, or set LIBERTY_PATH and STA_BIN directly.
+sv2v, yosys, iverilog, vvp, and Python 3 are required.
+CLOCK_PERIOD_NS overrides the mapping/STA target; changing it requires remapping.
+./synth.sh --reuse-mapping reruns analysis and the gate test only when the
+stored source/library/tool/flow hashes still match. It does not accept a
+stale mapping for different RTL or constraints.
+
+The runner records provenance in build/synthesis/mapping_inputs.json and
+results in build/synthesis/summary.json. It also emits area.txt, timing.log,
+gate.log, Yosys logs, and generated netlists under build/synthesis/.
+Only the runner and this reviewed summary belong in Git; copied libraries,
+cell models, netlists, binaries, and generated reports remain ignored.
+
+Tool/library provenance
+-----------------------
+Yosys: 0.68+post, c12172fbae8af5e20f6fb52e3d4e92d56ed587b6
+sv2v: 0.0.13
+OpenSTA: 3.1.0, b6a817bab8
+Liberty SHA-256:
+8d540a4d4cf6d09d27c87ad067857a9c0c2eeb023ab7a56e058cd3113db4e9b1
+
+The structural STA netlist removes signed qualifiers from wire/port
+declarations for OpenSTA parser compatibility. It retains exactly the same
+cell instances and bit connections; there are no arithmetic expressions
+in the mapped netlist. The functional gate test uses the original mapped
+netlist and zero-delay cell models generated from the same Liberty file.
+
+Mapped-netlist validation
+-------------------------
+PASS: 20/20 Conv/FC output words match the independent arithmetic model.
+All DEMO_WORD and DEMO_SUMMARY records match the RTL simulation exactly,
+including Conv elapsed cycles 66/65 and FC elapsed cycles 75/71.
+The normal ./synth.sh flow completed end to end. Icarus compilation of the
+full mapped hierarchy took several minutes; the report is based on that
+original mapped netlist.
+This is a directed zero-delay functional test, not formal equivalence or
+post-route/SDF simulation.
+Mapped-netlist SHA-256:
+d7f10061b52e9ca1c969366d1f94e93d3b0fa209af1d78e512b6018c24b6ce11
+Prefetch testbench SHA-256:
+49a16d787aba9ef2b74389e88bb513b5bf626ef7719c88e205cfe1755c87c815

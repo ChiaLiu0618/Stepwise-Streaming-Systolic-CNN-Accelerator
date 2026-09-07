@@ -46,6 +46,9 @@ run_verilator() {
     fi
     check_result "$out/run.log"
     echo "PASS: $top ($out/run.log)"
+    if [[ "$top" == tb_prefetch ]]; then
+        grep 'DEMO_SUMMARY' "$out/run.log"
+    fi
 }
 regfiles() {
     need iverilog

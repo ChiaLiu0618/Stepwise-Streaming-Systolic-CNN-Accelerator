@@ -13,3 +13,5 @@
 /build/
 /local/
 !/docs/images/architecture.png
+!/synth.sh
+!/scripts/*.py

@@ -104,7 +104,12 @@ and compute addresses/banks, and all delayed compute-control outputs.
 ./run.sh prefetch : serial and overlapped schedules for Conv and FC. Checks
 20 output words against an independent integer model and against serial
 execution, including activation bank switching and next-page weight reuse.
-The tested overlap eliminates 1 memory-only issue cycle for Conv and 4 for
-FC. These are schedule-specific savings, not a measured chip throughput gain.
+The test also prints DEMO_WORD and DEMO_SUMMARY records. Measured elapsed
+cycles (first configuration edge through final output, inclusive) are
+Conv 66 -> 65 and FC 75 -> 71. Active packet counts are Conv 11 -> 10 and
+FC 17 -> 13. The two no-op packets and repeated waiting cycles are not
+active packets; elapsed counts include setup, the fixed inter-job wait,
+and output latency. These are schedule-specific savings, not a measured
+chip throughput gain.
 ./run.sh all : also runs the original block, functional, and layer tests,
 whose stimulus has been migrated to the packed interface.

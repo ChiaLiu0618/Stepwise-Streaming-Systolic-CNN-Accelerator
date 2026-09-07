@@ -19,6 +19,64 @@ memory organization, instruction scheduling, and simulation-based verification.
 > link to this repository. Attribution does not make submission as your own
 > work acceptable. Preserve existing attribution and third-party notices.
 
+## A concrete prefetch demo
+
+Run `./run.sh prefetch` and inspect `build/prefetch/run.log`. The test runs
+two small jobs first with a serial schedule and then with overlapped loads.
+Every output is checked against an independent integer model and the serial
+result. These are measured RTL simulation counts:
+
+| Two-job workload | Schedule | Active instruction packets | Elapsed clock cycles | Output words |
+|:--|:--|--:|--:|--:|
+| Convolution | Serial | 11 | 66 | 2 |
+| Convolution | Prefetch | 10 | 65 | 2 |
+| Fully connected | Serial | 17 | 75 | 8 |
+| Fully connected | Prefetch | 13 | 71 | 8 |
+
+“Active packets” count memory and/or compute work; an overlapped packet
+counts once. Elapsed cycles are measured inclusively from the first
+configuration/load edge to the final output word. They include setup,
+pipeline latency, output serialization, and the test's fixed wait between
+jobs. Reset and the final post-output wait are excluded. This is a small,
+conservative demonstration schedule, not a throughput benchmark.
+
+The FC schedule illustrates where four memory-only cycles disappear:
+
+```text
+After the common configuration and initial loads:
+
+SERIAL
+compute:  A0 A1 A2 A3 | wait/drain | -- -- -- -- | B0 B1 B2 B3
+memory:   -- -- -- -- |    --      | L0 L1 L2 L3 | -- -- -- --
+
+PREFETCH
+compute:  A0 A1 A2 A3 | wait/drain | B0 B1 B2 B3
+memory:   L0 L1 L2 L3 |    --      | -- -- -- --
+
+A/B = current/next job; 0..3 = its four input-channel issues.
+L0..L3 load B's weight pages 1, 9, 17, 25; L0 also loads activation bank 1.
+A uses activation bank 0 and weight pages 0, 8, 16, 24.
+The wait/drain interval is the same in both schedules.
+```
+
+Both convolution runs produce exactly:
+
+```text
+word 0: 0909090909090909
+word 1: 2424242424242424
+```
+
+Both FC runs produce exactly:
+
+```text
+job A: 0909090909090909  1212121212121212  1b1b1b1b1b1b1b1b  2424242424242424
+job B: 2424242424242424  3636363636363636  4848484848484848  5a5a5a5a5a5a5a5a
+```
+
+Each hexadecimal word contains eight INT8 results. The log prints
+`DEMO_WORD` records with actual/expected values and completion cycles,
+followed by `DEMO_SUMMARY` records for the table above.
+
 ## Architecture
 
 ![CNN accelerator architecture](docs/images/architecture.png)
@@ -243,6 +301,8 @@ tb/
 data/                 Input image and quantized weight text files
 docs/                 Instruction/storage details and architecture image
 run.sh                Simulation entry point
+synth.sh              Synthesis, timing, and gate-test entry point
+scripts/              Reproducible synthesis runner
 build/                Generated binaries, logs, feature maps (ignored)
 local/legacy/         Preserved original local tool files (ignored)
 ```
@@ -338,24 +398,88 @@ All **ten testbenches passed** locally using Icarus Verilog and Verilator:
 
 The measured issue-cycle savings are specific to these schedules. Functional
 simulation does not establish silicon timing, area, power, or a general
-throughput improvement. The current RTL's shared weight storage and two-bank
-activation storage need new synthesis results for physical implementation claims.
+throughput improvement. The synthesis section below reports the current revision separately;
+physical implementation and power remain unmeasured.
 
-## Reported implementation results
+## Performance reporting: current and historical revisions
 
-| Metric | Value | Notes |
-|:--|:--|:--|
-| Frequency | 500 MHz | Nominal TT / 1.1 V / 25 °C |
-| Throughput | 129 GFLOPs/s | INT8-equivalent |
-| Total Area | 412.7 K µm² | Post-synthesis |
-| Model Tested | MNIST | Quantized 3×3 Conv + FC network |
-| Verification | RTL + Post-synthesis simulation | Verdi waveform inspection |
+Current synthesis results and their constraints are documented separately
+from the original ASIC implementation. A configured clock target is not a
+measured operating frequency. Post-synthesis cell area is not placed core
+area, and results from different cell libraries are not directly comparable.
 
----
+### Current revision: Nangate45 synthesis estimate
 
-The figures above are historical project results from the original ASIC
-flow, not new measurements of the packed-instruction and shared-regfile revision. Re-synthesis
-is required to measure this revision's area, frequency, and power.
+The current RTL was mapped with sv2v → Yosys/ABC and analyzed with OpenSTA,
+using the installed tools and Nangate45 library from the local Mixed
+Precision Conference project. The final mapping includes buffering and
+cell sizing with explicit drive/load constraints.
+
+| Current-revision result | Value |
+|:--|:--|
+| Library | Nangate45 typical, 1.1 V / 25 °C |
+| Mapped standard-cell area | **567,472 µm²** |
+| Mapped cell count | **357,599** |
+| Mapping/STA clock target | 2.0 ns / 500 MHz |
+| Worst setup slack at that target | **−0.28 ns — target not met** |
+| Estimated minimum period | **2.28 ns**, approximately **439 MHz** |
+| Zero-delay mapped-netlist check | **20/20 output words pass**, with the same cycle counts as RTL |
+
+These are **pre-layout estimates**, with an ideal clock and cell-pin loads.
+There is no placement, routed wiring, extracted parasitics, clock-tree
+implementation, or power analysis. The minimum-period estimate is not a
+silicon frequency claim. Storage is mapped to standard cells, not SRAM
+macros. This is not a like-for-like comparison with the older TSMC 40 nm area.
+
+Reproduce the flow with:
+
+```sh
+./synth.sh
+```
+
+The default dependency location is `~/Desktop/Mixed Precision Conference`.
+For another installation, specify the library and OpenSTA executable:
+
+```sh
+LIBERTY_PATH=/path/to/NangateOpenCellLibrary_typical.lib \
+STA_BIN=/path/to/sta ./synth.sh
+```
+
+`sv2v`, `yosys`, `iverilog`, and `vvp` must also be on `PATH`. The gate
+netlist is large; its Icarus compilation can take several minutes. Reports,
+netlists, functional cell models, and dependency copies remain under ignored
+`build/synthesis/`. See [synthesis constraints and provenance](docs/synthesis.txt).
+
+### Integer-operation counting
+
+This is an INT8 datapath. We use **GOPS/s**, with one multiply plus one
+accumulation counted as **two integer operations**. Under that convention,
+288 active PE MAC equivalents per cycle would give:
+
+```text
+peak GOPS/s = 288 × 2 × clock_frequency_Hz / 1e9
+```
+
+For example, an assumed 500 MHz clock gives a theoretical ceiling of
+288 GOPS/s (144 GMAC/s). This assumes full utilization and excludes load,
+drain, and output overhead; it is not a measured throughput result or a
+claim that the current revision achieves 500 MHz.
+
+### Historical original implementation — not the current RTL
+
+| Previously reported metric | Original-flow value |
+|:--|:--|
+| Clock frequency | 500 MHz |
+| Post-synthesis area | 412.7 K µm² |
+| Target | TSMC 40 nm, nominal TT / 1.1 V / 25 °C |
+| Workload | Quantized MNIST Conv + FC network |
+
+These are retained as historical project records. The original proprietary
+flow has not been rerun for the packed-control and shared-regfile revision.
+The previous “129 GFLOPs/s (INT8-equivalent)” figure is retired from the
+performance table: its workload and operation-count definition are not
+reproduced here, and INT8 work should not be presented as floating-point
+operations. It is not used to claim performance for this revision.
 
 ## References
 
