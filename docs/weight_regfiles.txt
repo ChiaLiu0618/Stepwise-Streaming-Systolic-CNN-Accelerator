@@ -1,0 +1,32 @@
+Shared weight register files
+
+Each PE position (row 0..8, column 0..7) has one Weight_Regfile shared
+by the corresponding PEs across the four systolic arrays: 72 files total.
+
+Recommended depth: 8 entries of 32 bits (four INT8 weights).
+Capacity: 32 bytes per file, 2304 bytes total, unchanged from the old bank.
+The current five-bit weight page index maps to:
+  entry = page[2:0]
+  byte lane = page[4:3]
+Loading one page writes only its selected byte lane in each file.
+
+FC compute uses indices 0..7: byte lane n feeds array n, equivalent to
+old weight pages index + 8*n. Convolution uses indices 0..31: the selected
+byte is broadcast to all four arrays. Loading is independent of mode.
+Weights remain in place until explicitly overwritten or reset.
+
+Reads are combinational; writes occur on the rising edge. A simultaneous
+read/write exposes the old value before the edge and the new value after
+it. Reset is asynchronous, active low, and clears all entries, preserving
+the old accelerator reset behavior. No extra pipeline cycle is introduced.
+
+Increasing depth would require extending the controller/load address
+mapping; changing the regfile parameter alone does not extend the ISA.
+This implementation is RTL storage, not a technology-specific memory macro.
+
+Validation:
+- tb_regfiles.sv: all entries, byte masks, retention, read/write timing, reset.
+- Existing tb_accelerator_functional.sv: all patterns passed using Verilator.
+
+Run the standalone regfile test from the project root:
+  ./run.sh regfiles

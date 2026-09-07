@@ -1,23 +1,15 @@
-# Only reviewed source and input data are tracked.
+# Publish reviewed project files only.
 *
 !*/
 !/.gitignore
 !/README.md
-!/Accelerator/Accelerator/Accelerator.sv
-!/Accelerator/Accelerator/tb_accelerator_functional.sv
-!/Accelerator/Controller/Controller.sv
-!/Accelerator/Neural_Network/tb_CONV1.sv
-!/Accelerator/Neural_Network/tb_CONV2.sv
-!/Accelerator/Neural_Network/tb_CONV3.sv
-!/Accelerator/Neural_Network/tb_FC.sv
-!/Accelerator/Processing_Elements/Processing_Elements.sv
-!/Accelerator/Systolic_Array/Systolic_Array.sv
-!/Accelerator/Systolic_Array/tb_Systolic_Array.sv
-!/Accelerator/Triangle_Buffer/Triangle_Buffer.sv
-!/Accelerator/Triangle_Buffer/tb_Triangle_Buffer.sv
-!/Accelerator/Neural_Network/conv1_weights_tb.txt
-!/Accelerator/Neural_Network/conv2_weights_tb.txt
-!/Accelerator/Neural_Network/conv3_weights_tb.txt
-!/Accelerator/Neural_Network/fc_weights_tb.txt
-!/Accelerator/Neural_Network/quantized_weights.txt
-!/Accelerator/Neural_Network/image.txt
+!/run.sh
+!/rtl/*.sv
+!/tb/unit/*.sv
+!/tb/integration/*.sv
+!/tb/layers/*.sv
+!/data/*.txt
+!/docs/*.txt
+/build/
+/local/
+!/docs/images/architecture.png
