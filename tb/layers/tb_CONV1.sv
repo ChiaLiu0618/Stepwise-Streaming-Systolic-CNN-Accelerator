@@ -447,7 +447,7 @@ task YOU_PASS_task; begin
     end
 
     $fclose(outfile);
-    $display("Output feature map written to output_feature_map.txt");
+    $display("Output feature map written to CONV1_OF_Map.txt");
 
     $display("----------------------------------------------------------------------------------------------------------------------");
     $display("                                                  Congratulations!                                                    ");

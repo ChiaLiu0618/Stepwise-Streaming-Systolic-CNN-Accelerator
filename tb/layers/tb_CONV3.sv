@@ -604,7 +604,7 @@ task YOU_PASS_task; begin
     end
 
     $fclose(outfile);
-    $display("Output feature map written to CONV2_Tile1_OF_Map.txt");
+    $display("Output feature map written to CONV3_Tile1_OF_Map.txt");
 
     // Open file for writing
     outfile = $fopen("CONV3_Tile2_OF_Map.txt", "w");
@@ -622,7 +622,7 @@ task YOU_PASS_task; begin
     end
 
     $fclose(outfile);
-    $display("Output feature map written to CONV2_Tile2_OF_Map.txt");
+    $display("Output feature map written to CONV3_Tile2_OF_Map.txt");
 
     $display("----------------------------------------------------------------------------------------------------------------------");
     $display("                                                  Congratulations!                                                    ");

@@ -288,6 +288,41 @@ feature maps. Layers execute in order so each consumes the previous layer's
 new outputs. Files in `data/` are never overwritten. Optional vendor FSDB
 and gate-level hooks are not enabled by the runner.
 
+## Layer-by-layer SRAM memory-image demo
+
+The neural-network tests use an **idealized, behavioral SRAM model for
+demonstration**: SystemVerilog arrays hold data, testbench tasks drive the
+SRAM input ports, and captured output words are saved as text. This makes
+intermediate activations easy to inspect without a physical SRAM macro.
+The model does not reproduce SRAM access latency, banking conflicts, or a
+complete memory bus protocol.
+
+Run `./run.sh network` to execute the layers in sequence. Each convolution
+layer prints its simulated SRAM writes in its log and exports a feature-map
+**memory image**. Here, “image” means a text dump of memory words, not a PNG.
+The next layer reads those files as its input activations:
+
+| Test | Reads activations from | Writes or reports |
+|:--|:--|:--|
+| CONV1 | `image.txt` | `CONV1_OF_Map.txt` |
+| CONV2 | `CONV1_OF_Map.txt` | `CONV2_Tile1_OF_Map.txt`, `CONV2_Tile2_OF_Map.txt` |
+| CONV3 | Both CONV2 tile files | `CONV3_Tile1_OF_Map.txt`, `CONV3_Tile2_OF_Map.txt` |
+| FC | Both CONV3 tile files | Final output words and feature values in the FC log; no further activation file |
+
+Each generated feature-map word is written as **16 hexadecimal digits**
+representing a 64-bit word with eight INT8 output-channel activations.
+Within a word, channel 0 occupies bits `[63:56]` and channel 7 occupies
+bits `[7:0]`. Words are grouped into spatial rows; separate tile files hold
+different output-channel groups. The starting `image.txt` instead contains
+decimal input pixel values.
+
+The runner prints the fresh `build/network/run.XXXXXX/` directory containing
+these memory images. Per-layer SRAM-write traces and result checks are in
+`build/network/CONV1/run.log`, `CONV2/run.log`, `CONV3/run.log`, and
+`FC/run.log`. This file-based handoff demonstrates the full activation flow
+between separate layer simulations. It is not an on-chip layer sequencer.
+Generated memory images remain ignored by Git and are recreated on each run.
+
 ## Verification and limits
 
 All **ten testbenches passed** locally using Icarus Verilog and Verilator:
