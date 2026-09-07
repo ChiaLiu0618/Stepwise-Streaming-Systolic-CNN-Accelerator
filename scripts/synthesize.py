@@ -27,7 +27,7 @@ def main():
     library = Path(os.environ.get('LIBERTY_PATH', str(dependency /
                    'third_party/OpenROAD-flow-scripts/flow/platforms/nangate45/lib/NangateOpenCellLibrary_typical.lib'))).resolve()
     sta = os.environ.get('STA_BIN', str(dependency / 'third_party/OpenSTA/build/sta'))
-    period = float(os.environ.get('CLOCK_PERIOD_NS', '2.0'))
+    period = float(os.environ.get('CLOCK_PERIOD_NS', '2.5'))
     if not 0 < period < 1000:
         raise ValueError('CLOCK_PERIOD_NS must be between 0 and 1000')
     for tool in ('sv2v', 'yosys', 'iverilog', 'vvp', sta):
@@ -37,6 +37,7 @@ def main():
         raise RuntimeError('Set LIBERTY_PATH to an existing Nangate45 typical Liberty file')
     out = ROOT / 'build/synthesis'
     out.mkdir(parents=True, exist_ok=True)
+    (out / 'summary.json').unlink(missing_ok=True)
 
     def run(command, log):
         print(f'Running {Path(command[0]).name}: {log}', flush=True)

@@ -417,11 +417,11 @@ cell sizing with explicit drive/load constraints.
 | Current-revision result | Value |
 |:--|:--|
 | Library | Nangate45 typical, 1.1 V / 25 °C |
-| Mapped standard-cell area | **567,472 µm²** |
+| Mapped standard-cell area | **566,058 µm²** |
 | Mapped cell count | **357,599** |
-| Mapping/STA clock target | 2.0 ns / 500 MHz |
-| Worst setup slack at that target | **−0.28 ns — target not met** |
-| Estimated minimum period | **2.28 ns**, approximately **439 MHz** |
+| Mapping/STA clock target | 2.5 ns / 400 MHz |
+| Worst setup slack at that target | **+0.01 ns — target met** |
+| Estimated minimum period | **2.49 ns**, approximately **402 MHz** |
 | Zero-delay mapped-netlist check | **20/20 output words pass**, with the same cycle counts as RTL |
 
 These are **pre-layout estimates**, with an ideal clock and cell-pin loads.
@@ -468,10 +468,9 @@ accumulation counted as **two integer operations**. Under that convention,
 peak GOPS/s = 288 × 2 × clock_frequency_Hz / 1e9
 ```
 
-For example, an assumed 500 MHz clock gives a theoretical ceiling of
-288 GOPS/s (144 GMAC/s). This assumes full utilization and excludes load,
-drain, and output overhead; it is not a measured throughput result or a
-claim that the current revision achieves 500 MHz.
+At the 400 MHz synthesis target, the theoretical ceiling is 230.4 GOPS/s
+(115.2 GMAC/s). This assumes full utilization and excludes load, drain, and
+output overhead; it is not a measured application-throughput result.
 
 ## References
 

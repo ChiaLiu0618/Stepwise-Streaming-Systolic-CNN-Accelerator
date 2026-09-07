@@ -8,20 +8,20 @@ activation banks. All storage maps to standard cells; no SRAM macro model.
 
 Final mapping results
 ---------------------
-Mapped area: 567472.164 square micrometers
+Mapped area: 566057.842 square micrometers
 Mapped cells: 357599
-Sequential area: 189147.280 square micrometers (33.33%)
-Clock target: 2.0 ns (500 MHz)
-Worst setup slack: -0.28 ns (target NOT met)
-OpenSTA minimum period including port paths: 2.28 ns (438.80 MHz)
-Total negative setup slack: -264.10 ns
+Sequential area: 189147.280 square micrometers (33.41%)
+Clock target: 2.5 ns (400 MHz)
+Worst setup slack: +0.01 ns (target met)
+OpenSTA minimum period including port paths: 2.49 ns (402.20 MHz)
+Total negative setup slack: 0.00 ns
 
 Constraints and limits
 ----------------------
 Library: NangateOpenCellLibrary_typical.lib, Nangate45, 1.1 V, 25 C.
-ABC mapping: 2000 ps target, BUF_X1 input driver, 5 fF output load;
+ABC mapping: 2500 ps target, BUF_X1 input driver, 5 fF output load;
 default constrained mapping includes buffering, upsizing, and downsizing.
-STA: 2.0 ns ideal clock, 0.05 ns uncertainty, max input/output delays 0.2 ns,
+STA: 2.5 ns ideal clock, 0.05 ns uncertainty, max input/output delays 0.2 ns,
 min input/output delays 0 ns, input transition 0.05 ns, output load 5 fF.
 The asynchronous reset input is false-pathed; reset recovery/removal is
 not characterized by this run. No placement, CTS, routing, wire parasitics,
@@ -35,8 +35,8 @@ The final area must include macro interfaces and physical implementation
 overhead. Macro integration must address combinational read timing, byte
 write enables, and asynchronous reset semantics; a percentage reduction
 cannot be assumed from these synthesis results alone.
-The estimated clock limit is not measured silicon performance. It must
-not be presented as an achieved 500 MHz implementation.
+The estimated clock limit is not measured silicon performance. The 400 MHz
+target is met only by this pre-layout timing model and its stated constraints.
 
 An initial mapping without ABC drive/load constraints exposed extreme
 mode-control fanout. The reported final mapping uses constrained ABC
@@ -89,6 +89,6 @@ original mapped netlist.
 This is a directed zero-delay functional test, not formal equivalence or
 post-route/SDF simulation.
 Mapped-netlist SHA-256:
-d7f10061b52e9ca1c969366d1f94e93d3b0fa209af1d78e512b6018c24b6ce11
+d84b3abf4eff669005dceb2ab3ad286947b9759312112845c9cc3e94afb070f2
 Prefetch testbench SHA-256:
 49a16d787aba9ef2b74389e88bb513b5bf626ef7719c88e205cfe1755c87c815
