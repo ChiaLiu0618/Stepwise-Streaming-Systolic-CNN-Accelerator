@@ -1,10 +1,13 @@
-# Stepwise-Streaming Systolic CNN Accelerator
+# CNN Accelerator with Shared Weight Storage and Memory Prefetching
 
 A SystemVerilog CNN accelerator with **four 9 × 8 systolic arrays (288 PEs)**,
 INT8 weights and activations, and a programmable instruction schedule. The
-current RTL combines locally resident weights, stepwise activation streaming,
+current RTL combines shared weight storage, streamed activations,
 and independent memory/compute instruction fields to overlap useful work
 with data loading.
+
+This personal hardware project demonstrates RTL design, systolic dataflow,
+memory organization, instruction scheduling, and simulation-based verification.
 
 > **Ownership and academic integrity**
 >
